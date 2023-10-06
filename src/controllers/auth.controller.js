@@ -133,33 +133,6 @@ const verify = (req, res) => {
         });
     }
 };
-
-
-// const verifyUser = (req, res, next) => {
-//     const token = req.cookies.token;
-//     if (!token) {
-//         return res.json({ Error: "You are not Authenticated" })
-//     } else {
-//         jwt.verify(token, 'jwt-secret-key', (err, decoded) => {
-//             if (err) {
-//                 return res.json({ Error: "Token is invalid" });
-//             } else {
-//                 req.name = decoded.name;
-//                 req.role = decoded.role;
-//                 req.username = decoded.username;
-//                 next();
-//             }
-//         })
-//     }
-// }
-// app.get('/', verifyUser, (req, res) => {
-//     return res.json({
-//         success: true,
-//         name: req.name,
-//         role: req.role,
-//         username: req.username
-//     });
-// })
 module.exports = {
     register,
     login,
