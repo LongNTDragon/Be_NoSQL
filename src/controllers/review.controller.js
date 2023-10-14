@@ -66,13 +66,7 @@ const remove = async (req, res, next) => {
     const { data } = JWTService.decodeAccessToken(req.session.userToken.accessToken)
     const reviewArr = await db.collection('products').aggregate([
         { $unwind: '$reviews' },
-        {
-            $match: {
-                $and: [
-                    { 'reviews.rvId': new Types.ObjectId(req.params.id) },
-                    { 'reviews.customer.userId': new Types.ObjectId(data.id) }]
-            }
-        }
+        { $match: { 'reviews.rvId': new Types.ObjectId(req.params.id) } }
     ]).toArray()
 
     if (reviewArr.length == 0) {

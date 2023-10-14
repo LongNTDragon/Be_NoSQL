@@ -33,7 +33,6 @@ const getByProId = async (req, res, next) => {
 }
 
 const create = async (req, res, next) => {
-    const docNumber = await db.collection('products').countDocuments()
     const product = {
         proName: req.body.proName,
         quantity: req.body.quantity,
@@ -41,16 +40,11 @@ const create = async (req, res, next) => {
         image: `/images/${req.files[0].filename}`
     }
 
-    try {
-        await db.collection('products').insertOne(product)
-        return res.status(201).json({
-            success: true,
-            data: product
-        })
-    } catch (error) {
-        fs.unlinkSync(req.files[0].path)
-        next(error)
-    }
+    await db.collection('products').insertOne(product)
+    return res.status(201).json({
+        success: true,
+        data: product
+    })
 }
 
 const update = async (req, res, next) => {
@@ -74,6 +68,29 @@ const update = async (req, res, next) => {
     return getByProId(req, res, next)
 }
 
+const updateImg = async (req, res, next) => {
+    if (req.params.id.length != 24) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid proId'
+        })
+    }
+
+    const proArr = await db.collection('products').find({ _id: new Types.ObjectId(req.params.id) }).toArray()
+    if (proArr.length == 0) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid proId'
+        })
+    }
+
+    const imgDes = `/images/${req.files[0].filename}`
+    await db.collection('products').updateOne({ _id: new Types.ObjectId(req.params.id) }, { $set: { image: imgDes } })
+
+    fs.unlinkSync(`./public${proArr[0].image}`)
+    return getByProId(req, res, next)
+}
+
 const remove = async (req, res, next) => {
     if (req.params.id.length != 24) {
         return res.status(400).json({
@@ -90,10 +107,27 @@ const remove = async (req, res, next) => {
         })
     }
 
+    fs.unlinkSync(`./public${productArr[0].image}`)
     await db.collection('products').deleteOne({ _id: new Types.ObjectId(req.params.id) })
 
     return res.status(200).json({
         success: true
+    })
+}
+
+const search = async (req, res, next) => {
+    const proArr = await db.collection('products').find({ proName: { $regex: req.body.content } }).toArray()
+
+    if (proArr.length == 0) {
+        return res.status(404).json({
+            success: false,
+            message: 'No product found'
+        })
+    }
+
+    return res.status(200).json({
+        success: true,
+        data: proArr
     })
 }
 
@@ -102,5 +136,7 @@ module.exports = {
     getByProId,
     create,
     update,
-    remove
+    remove,
+    updateImg,
+    search
 }

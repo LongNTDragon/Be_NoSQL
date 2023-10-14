@@ -79,6 +79,26 @@ const imageFilter = (req, file, cb) => {
     cb(null, true)
 }
 
+const validateSearch = (data) => {
+    const dataSchema = joi.object({
+        content: joi.string().required()
+    })
+    return dataSchema.validate(data)
+}
+
+const validateUserUpdate = (data) => {
+    const dataSchema = joi.object({
+        name: joi.string(),
+        email: joi.string().email(),
+        password: joi.string().length(5),
+        gender: joi.string(),
+        phone: joi.string().length(10).pattern(/^[0-9]+$/).messages({ 'string.pattern.base': 'The number phone must have to 10 digits' }),
+        address: joi.string(),
+        is_Active: joi.number()
+    })
+    return dataSchema.validate(data)
+}
+
 module.exports = {
     validateInsertProduct,
     validateUpdateProduct,
@@ -88,5 +108,7 @@ module.exports = {
     validateLogin,
     validateReview,
     validateBill,
-    imageFilter
+    imageFilter,
+    validateSearch,
+    validateUserUpdate
 }

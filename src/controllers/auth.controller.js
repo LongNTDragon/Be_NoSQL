@@ -20,7 +20,8 @@ const register = async (req, res, next) => {
         gender: req.body.gender,
         phone: req.body.phone,
         address: req.body.address,
-        password: bcrypt.hashSync(req.body.password, salt)
+        password: bcrypt.hashSync(req.body.password, salt),
+        is_Active: 1
     }
 
     await db.collection('roles').updateOne({ roleName: 'user' }, { $push: { users: user } })
@@ -45,6 +46,13 @@ const login = async (req, res, next) => {
     }
 
     const user = userArr[0].users
+    if (user.is_Active == 0) {
+        return res.status(404).json({
+            success: false,
+            message: 'Your account is locked'
+        })
+    }
+
     const validPW = bcrypt.compareSync(req.body.password, user.password)
     if (!validPW) {
         return res.status(400).json({
