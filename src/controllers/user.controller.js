@@ -4,9 +4,29 @@ const db = mongoose.connection
 
 const getAll = async (req, res, next) => {
     const userArr = await db.collection('roles').find({ roleName: 'user' }).toArray()
+    const users = []
+    userArr[0].users.forEach(user => {
+        if (user.is_Active == 1) {
+            users.push(user)
+        }
+    })
     return res.status(200).json({
         success: true,
-        data: userArr[0].users
+        data: users
+    })
+}
+
+const getBlackList = async (req, res, next) => {
+    const userArr = await db.collection('roles').find({ roleName: 'user' }).toArray()
+    const users = []
+    userArr[0].users.forEach(user => {
+        if (user.is_Active == 0) {
+            users.push(user)
+        }
+    })
+    return res.status(200).json({
+        success: true,
+        data: users
     })
 }
 
@@ -141,6 +161,7 @@ const remove = async (req, res, next) => {
 
 module.exports = {
     getAll,
+    getBlackList,
     getById,
     create,
     update,
