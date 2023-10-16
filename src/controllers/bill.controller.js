@@ -87,11 +87,8 @@ const remove = async (req, res, next) => {
         })
     }
 
-    const { data } = JWTService.decodeAccessToken(req.session.userToken.accessToken)
-
     await db.collection('bills').deleteOne({
-        _id: new Types.ObjectId(req.params.id),
-        userId: new Types.ObjectId(data.id)
+        _id: new Types.ObjectId(req.params.id)
     })
 
     return res.status(200).json({

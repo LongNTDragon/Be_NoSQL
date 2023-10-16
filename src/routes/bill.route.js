@@ -15,6 +15,6 @@ const router = Router()
 router.get('/', authenticate, isAdmin, asyncHanle(getAll))
 router.get('/getByProId/:id', authenticate, asyncHanle(getByProId))
 router.post('/create', authenticate, validateBody(validateBill), asyncHanle(create))
-router.delete('/:id', authenticate, asyncHanle(remove))
+router.delete('/:id', authenticate, isAdmin, asyncHanle(remove))
 
 module.exports = router
