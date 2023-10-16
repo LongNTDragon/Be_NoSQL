@@ -56,6 +56,35 @@ const create = async (req, res, next) => {
     })
 }
 
+const getByProId = async (req, res, next) => {
+    if (req.params.id.length != 24) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid proId'
+        })
+    }
+
+    const proArr = await db.collection('products').find({ _id: new Types.ObjectId(req.params.id) }).toArray()
+    if (proArr.length == 0) {
+        return res.status(400).json({
+            success: false,
+            message: 'Invalid proId'
+        })
+    }
+
+    const { data } = JWTService.decodeAccessToken(req.session.userToken.accessToken)
+
+    const reviewArr = await db.collection('products').aggregate([
+        { $unwind: '$reviews' },
+        { $match: { $and: [{ _id: new Types.ObjectId(req.params.id) }, { 'reviews.customer.userId': new Types.ObjectId(data.id) }] } }
+    ]).toArray()
+
+    return res.status(200).json({
+        success: true,
+        data: reviewArr
+    })
+}
+
 const remove = async (req, res, next) => {
     if (req.params.id.length != 24) {
         return res.status(400).json({
@@ -63,7 +92,7 @@ const remove = async (req, res, next) => {
             message: 'Invalid rvId'
         })
     }
-    const { data } = JWTService.decodeAccessToken(req.session.userToken.accessToken)
+
     const reviewArr = await db.collection('products').aggregate([
         { $unwind: '$reviews' },
         { $match: { 'reviews.rvId': new Types.ObjectId(req.params.id) } }
@@ -88,5 +117,6 @@ const remove = async (req, res, next) => {
 
 module.exports = {
     create,
+    getByProId,
     remove
 }
