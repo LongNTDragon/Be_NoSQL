@@ -78,8 +78,11 @@ const login = async (req, res, next) => {
     })
 }
 
-const logout = (req, res, next) => {
-    req.session.destroy(err => console.log(err))
+const logout = async (req, res, next) => {
+    await req.session.destroy(err => {
+        if (err)
+            console.log(err)
+    })
 
     res.clearCookie('NoSQL_API', { path: '/' })
 
