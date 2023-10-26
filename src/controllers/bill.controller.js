@@ -10,7 +10,19 @@ const getAll = async (req, res, next) => {
     })
 }
 
-const getByProId = async (req, res, next) => {
+const getAllByUserId = async (req, res, next) => {
+    const { data } = JWTService.decodeAccessToken(req.session.userToken.accessToken)
+    const bills = await db.collection('bills').find({
+        userId: new Types.ObjectId(data.id)
+    }).toArray()
+
+    return res.status(200).json({
+        success: true,
+        data: bills
+    })
+}
+
+const getByProIdAndUserId = async (req, res, next) => {
     if (req.params.id.length != 24) {
         return res.status(400).json({
             success: false,
@@ -54,13 +66,13 @@ const create = async (req, res, next) => {
         name: req.body.name,
         phone: req.body.phone,
         address: req.body.address,
-        quantity: req.body.quantity,
         total: req.body.quantity * product.price,
         createdAt: new Date(Date.now()),
         products: [{
             proId: product._id,
             proName: product.proName,
-            price: product.price
+            price: product.price,
+            quantity: req.body.quantity
         }]
     }
 
@@ -98,7 +110,8 @@ const remove = async (req, res, next) => {
 
 module.exports = {
     getAll,
-    getByProId,
+    getByProIdAndUserId,
+    getAllByUserId,
     create,
     remove
 }

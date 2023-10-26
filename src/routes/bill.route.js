@@ -1,7 +1,8 @@
 const { Router } = require("express")
 const {
     getAll,
-    getByProId,
+    getByProIdAndUserId,
+    getAllByUserId,
     create,
     remove
 } = require("../controllers/bill.controller")
@@ -13,7 +14,8 @@ const { authenticate, isAdmin } = require("../middlewares/auth.middleware")
 const router = Router()
 
 router.get('/', authenticate, isAdmin, asyncHanle(getAll))
-router.get('/getByProId/:id', authenticate, asyncHanle(getByProId))
+router.get('/getAllByUserId', authenticate, asyncHanle(getAllByUserId))
+router.get('/getByProIdAndUserId/:id', authenticate, asyncHanle(getByProIdAndUserId))
 router.post('/create', authenticate, validateBody(validateBill), asyncHanle(create))
 router.delete('/:id', authenticate, isAdmin, asyncHanle(remove))
 
