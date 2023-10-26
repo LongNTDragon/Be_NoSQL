@@ -162,7 +162,7 @@ const getInfo = async (req, res, next) => {
 
 const updateInfo = async (req, res, next) => {
     const { data } = JWTService.decodeAccessToken(req.session.userToken.accessToken)
-    const userArr = await db.collection('roles').find({ roleName: 'user' }).toArray()
+    const userArr = await db.collection('roles').find({ roleName: data.role }).toArray()
     let pos
     userArr[0].users.forEach((user, index) => {
         if (user.userId.equals(data.id)) {
@@ -189,6 +189,31 @@ const updateInfo = async (req, res, next) => {
     return getInfo(req, res, next)
 }
 
+const changePassWord = async (req, res, next) => {
+    const { data } = JWTService.decodeAccessToken(req.session.userToken.accessToken)
+
+    const userArr = await db.collection('roles').find({ roleName: data.role }).toArray()
+
+    let pos
+    userArr[0].users.forEach((user, index) => {
+        if (user.userId.equals(data.id))
+            pos = index
+    })
+
+    let user = {}
+    let salt = bcrypt.genSaltSync()
+    user[`users.${pos}.password`] = bcrypt.hashSync(req.body.password, salt)
+
+    await db.collection('roles').updateOne(
+        { 'users.userId': new Types.ObjectId(data.id) },
+        { $set: user }
+    )
+
+    return res.status(200).json({
+        success: true
+    })
+}
+
 module.exports = {
     register,
     login,
@@ -196,5 +221,6 @@ module.exports = {
     refreshToken,
     verify,
     updateInfo,
-    getInfo
+    getInfo,
+    changePassWord
 }

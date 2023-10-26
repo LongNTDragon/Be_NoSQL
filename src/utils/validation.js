@@ -99,6 +99,13 @@ const validateUserUpdate = (data) => {
     return dataSchema.validate(data)
 }
 
+const validateChangePassword = (data) => {
+    const dataSchema = joi.object({
+        password: joi.string().length(5).required()
+    })
+    return dataSchema.validate(data)
+}
+
 module.exports = {
     validateInsertProduct,
     validateUpdateProduct,
@@ -110,5 +117,6 @@ module.exports = {
     validateBill,
     imageFilter,
     validateSearch,
-    validateUserUpdate
+    validateUserUpdate,
+    validateChangePassword
 }

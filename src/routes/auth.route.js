@@ -6,13 +6,15 @@ const {
     refreshToken,
     verify,
     getInfo,
-    updateInfo
+    updateInfo,
+    changePassWord
 } = require("../controllers/auth.controller")
 const validateBody = require("../middlewares/validate.middleware")
 const {
     validateRegister,
     validateLogin,
-    validateUserUpdate
+    validateUserUpdate,
+    validateChangePassword
 } = require("../utils/validation")
 const asyncHandle = require("../middlewares/asyncHandle.middleware")
 const { authenticate } = require("../middlewares/auth.middleware")
@@ -25,6 +27,7 @@ router.post('/logout', authenticate, asyncHandle(logout))
 router.post('/refreshToken', asyncHandle(refreshToken))
 router.get('/verify', asyncHandle(verify))
 router.get('/getInfo', authenticate, asyncHandle(getInfo))
+router.post('/changePassword', authenticate, validateBody(validateChangePassword), asyncHandle(changePassWord))
 router.post('/updateInfo', authenticate, validateBody(validateUserUpdate), asyncHandle(updateInfo))
 
 module.exports = router
