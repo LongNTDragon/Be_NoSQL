@@ -130,6 +130,7 @@ const refreshToken = async (req, res, next) => {
         message: 'Refresh success'
     })
 }
+
 const verify = (req, res) => {
     const session = req.session.userToken;
     if (session) {
@@ -143,11 +144,50 @@ const verify = (req, res) => {
             verify: false
         });
     }
-};
+}
+
+const updateInfo = async (req, res, next) => {
+    const { data } = JWTService.decodeAccessToken(req.session.userToken.accessToken)
+    const userArr = await db.collection('roles').find({ roleName: 'user' }).toArray()
+    let pos
+    userArr[0].users.forEach((user, index) => {
+        if (user.userId.equals(data.id)) {
+            pos = index
+        }
+    })
+
+    let user = {}
+
+    if (req.body.name)
+        user[`users.${pos}.name`] = req.body.name
+    if (req.body.gender)
+        user[`users.${pos}.gender`] = req.body.gender
+    if (req.body.phone)
+        user[`users.${pos}.phone`] = req.body.phone
+    if (req.body.address)
+        user[`users.${pos}.address`] = req.body.address
+
+    await db.collection('roles').updateOne(
+        { 'users.userId': new Types.ObjectId(data.id) },
+        { $set: user }
+    )
+
+    const userN = await db.collection('roles').aggregate([
+        { $unwind: '$users' },
+        { $match: { 'users.userId': new Types.ObjectId(data.id) } }
+    ]).toArray()
+
+    return res.status(200).json({
+        success: true,
+        data: userN[0].users
+    })
+}
+
 module.exports = {
     register,
     login,
     logout,
     refreshToken,
-    verify
+    verify,
+    updateInfo
 }
