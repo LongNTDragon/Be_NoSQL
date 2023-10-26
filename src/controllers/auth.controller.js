@@ -146,6 +146,20 @@ const verify = (req, res) => {
     }
 }
 
+const getInfo = async (req, res, next) => {
+    const { data } = JWTService.decodeAccessToken(req.session.userToken.accessToken)
+
+    const userArr = await db.collection('roles').aggregate([
+        { $unwind: '$users' },
+        { $match: { 'users.userId': new Types.ObjectId(data.id) } }
+    ]).toArray()
+
+    return res.status(200).json({
+        success: true,
+        data: userArr[0].users
+    })
+}
+
 const updateInfo = async (req, res, next) => {
     const { data } = JWTService.decodeAccessToken(req.session.userToken.accessToken)
     const userArr = await db.collection('roles').find({ roleName: 'user' }).toArray()
@@ -172,15 +186,7 @@ const updateInfo = async (req, res, next) => {
         { $set: user }
     )
 
-    const userN = await db.collection('roles').aggregate([
-        { $unwind: '$users' },
-        { $match: { 'users.userId': new Types.ObjectId(data.id) } }
-    ]).toArray()
-
-    return res.status(200).json({
-        success: true,
-        data: userN[0].users
-    })
+    return getInfo(req, res, next)
 }
 
 module.exports = {
@@ -189,5 +195,6 @@ module.exports = {
     logout,
     refreshToken,
     verify,
-    updateInfo
+    updateInfo,
+    getInfo
 }

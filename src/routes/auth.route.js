@@ -5,6 +5,7 @@ const {
     logout,
     refreshToken,
     verify,
+    getInfo,
     updateInfo
 } = require("../controllers/auth.controller")
 const validateBody = require("../middlewares/validate.middleware")
@@ -23,6 +24,7 @@ router.post('/login', validateBody(validateLogin), asyncHandle(login))
 router.post('/logout', authenticate, asyncHandle(logout))
 router.post('/refreshToken', asyncHandle(refreshToken))
 router.get('/verify', asyncHandle(verify))
+router.get('/getInfo', authenticate, asyncHandle(getInfo))
 router.post('/updateInfo', authenticate, validateBody(validateUserUpdate), asyncHandle(updateInfo))
 
 module.exports = router
